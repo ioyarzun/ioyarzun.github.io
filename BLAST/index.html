@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+
+  <head bgcolor=\"#ffffff\">
+    <title>Iñigo Oyarzun´s page</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="../assets/css/main.css" />
+  </head>
+
+<style>
+  body {
+    background-image: url('https://i.pinimg.com/originals/9c/1a/c7/9c1ac7d197253cf2973364bd5c2b3373.jpg');
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    background-size: cover;
+}
+</style>
+  <body>
+    <header id="header">
+			<h1><strong><a href="../index.html">Home</a></strong> </h1>
+			<nav id="nav">
+				<ul>
+					<li><a href="../datamodel/datamodel.html">DATA MODEL</a></li>
+          <li><a href="../random_entertainment/somemusic.html">Some music</a></li>
+          <li><a href="../random_entertainment/index.html">Random entertainment</a></li>
+				</ul>
+			</nav>
+		</header>
+    <section>
+    <center>
+    <h1 style="font-size:35px;font-family:serif;text-align:center">BLAST</h1>
+    <form action="blast.php" id="input" name="input" method="POST" enctype="multipart/form-data" target="_blank">
+      <ul class="actions">
+      <div>
+	      <h2 style="font-size:25px;font-family:serif;;text-align:center">To run a BLAST search you can choose between:</h2>
+        <div class="row uniform 50%">
+          <div class="6u 12u$(xsmall)">
+            <p style="font-size:20px;font-family:serif;text-align:center;font-style:normal">1.- Introduce a fasta sequence or a raw sequence</p>
+              <textarea name="fasta"  rows="3" placeholder="Introduce your sequence here"></textarea>
+
+          </div>
+          <div class="6u$ 12u$(xsmall)">
+            <p style="font-size:20px;font-family:serif;text-align:left;font-style:normal">2.- Upload a file in fasta format</p>
+
+              <p style="text-align:left"><input name="uploaded_file" style="text-align:left" type="file"></p>
+
+          </div>
+        </div>
+
+        <div class="row uniform 50%">
+            <div class="4u 12u$(xsmall)">
+              <p>Database used:</p>
+              <input type="radio" id="priority-low" name="DB" value="SwissProt" />
+              <label for="priority-low">Swissprot</label>
+
+              <input type="radio" id="priority-normal" name="DB" value="PDB" checked/>
+              <label for="priority-normal">PDB</label>
+
+            </div>
+              <div class="6u$ 12u$(xsmall)">
+                <ul class="actions">
+                  <li><input type="submit" value="Run BLAST" class="special" /></li>
+                  <li><input type="reset" value="Clear Data" /></li>
+                </ul>
+              </div>
+            </div>
+
+
+      </center>
+    </form>
+
+</section>
+<footer id="footer">
+  <div class="container">
+    <ul class="icons">
+      <li><a href="https://www.linkedin.com/in/iñigo-oyarzun-269090161" target="_blank" class="icon fa-linkedin"></a></li>
+      <li><a href="https://www.facebook.com/inigo.oyarzun.3" target="_blank"  class="icon fa-facebook"></a></li>
+
+    </ul>
+    <ul class="copyright">
+      <li> My Social Media </li>
+    </ul>
+  </div>
+</footer>
+  <script src="../assets/js/jquery.min.js"></script>
+  <script src="../assets/js/skel.min.js"></script>
+  <script src="../assets/js/util.js"></script>
+  <script src="../assets/js/main.js"></script>
+  </body>
+</html>
