@@ -1,131 +1,241 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+
+  <head bgcolor=\"#ffffff\">
+    <title>Iñigo Oyarzun´s page</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="assets/css/main.css" />
+    <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+    <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+
+    <link rel="stylesheet" href="DataTable/jquery.dataTables.min.css"/>
+    <script type="text/javascript" src="DataTable/jquery-2.2.0.min.js"></script>
+    <script type="text/javascript" src="DataTable/jquery.dataTables.min.js"></script>
+  </head>
+
+  <body>
+    <header id="header">
+			<h1><strong><a href="../index.html">Home</a></strong> </h1>
+			<nav id="nav">
+				<ul>
+					<li><a href="../datamodel/datamodel.html">DATA MODEL</a></li>
+          <li><a href="../random_entertainment/somemusic.html">Some music</a></li>
+          <li><a href="../random_entertainment/index.html">Random entertainment</a></li>
+				</ul>
+			</nav>
+		</header>
 <?php
 session_start();
-#include once config quitado porque lo he compiado y pegado
-$blastHome = "/home/dbw00/blast";
-$blastDbsDir = "$blastHome/DBS";
-$blastExe = "$blastHome/bin/blastp";
-$blastDbs = ["SwissProt" => "sprot", "PDB" => "pdb"];
-$input_file_path = "/tmp/input.fasta";
-$database_to_use=$_POST['DB'];
-$blastCmdLine = "$blastExe -db $blastDbsDir/" . $blastDbs[$database_to_use] . " -evalue 0.001 -max_target_seqs 100 -outfmt \"6 sseqid stitle evalue\" -query $input_file_path ";
 
+$blastDbs = ["SwissProt" => "swissprot", "PDB" => "pdb"];
+$database_to_use = $blastDbs[$_POST['DB']];
 
-#priority to uploaded files
-if ($_FILES['uploaded_file']['name']) {
-    $_POST['fasta']=  file_get_contents($_FILES['uploaded_file']['tmp_name']);
-}
+// $file = "iteremo.txt";
+// $switcher=False;
+// $handle = fopen($file, "r");
 
-
-if (!$_POST['fasta']) {
-  header('Location: index.html');
-  exit();
-} else {
-
-    if (!isFasta($_POST['fasta'])) {
-        $rawSequence = (string) strtoupper($_POST['fasta']);
-        if(!isRawSequence($rawSequence)){
-          header('Location: index.html');
-          exit();
-        }else{
-          $fasta = $rawSequence;
-        }
-    } else {
-        $fasta = $_POST['fasta'];
-    }
-    $fasta_file = fopen($input_file_path, "w") or die ("File cannot be opened, select another file");
-    fwrite($fasta_file, $fasta);
-    fclose($fasta_file);
-}
-
-exec($blastCmdLine, $outputblast, $status);
-if (0 === $status) {
-print headerDBW("Search results");
-    ?>
-<p><br>Number of Hits: <?php print count($outputblast) ?> <br></p>
-<p class="button"><a href="index.html?new=1">New Search</a></p>
-<table border="2" cellspacing="2" cellpadding="3" id="blastTable">
-        <thead>
-            <tr>
-		<th>idCode</th>
-                <th>Header</th>
-                <th>E. value</th>
-            </tr>
-        </thead>
-        <tbody>
-            <?php for ($i = 1; $i < count($outputblast); $i++) { ?>
-                <tr>
-                    <?php
-                        $line_values = explode("\t", $outputblast[$i]);
-                        for($index_line_values = 0; $index_line_values < count($line_values); $index_line_values++) {
-                        ?>
-                        <td><?php
-		                if($index_line_values == 0 ){
-		                  $seq_id = explode("_",$line_values[$index_line_values])[0];
-		                  if ($database_to_use=="PDB"){$url = "http://www.rcsb.org/structure/$seq_id";}
-		                  if ($database_to_use=="SwissProt"){
-					$seq_id=substr($seq_id,3,6);
-					$url = "https://www.uniprot.org/uniprot/$seq_id";}
-		                  print "<a href=\"$url\" target=\"_blank\">$line_values[$index_line_values] </a>";
-		                }else{
-		                  print "<p>$line_values[$index_line_values]</p>";
-		                }
-                         ?> </td>
-                    <?php } ?>
-                </tr>
-            <?php } ?>
-        </tbody>
-    </table>
-<p class="button"><a href="index.html?new=1">New Search</a></p>
-<script type="text/javascript">
-    $(document).ready(function () {
-        $('#blastTable').DataTable();
-    });
-</script>
-<?php } else {
-     echo "Problem: $status";
-}
-
-
-function isFasta($file) {
-    return (substr($file,0,1) == ">");
-}
-
-function isRawSequence($str){
-    return True;
-    $protein_letters = "ACDEFGHIKLMNPQRSTVWY*";
-    $str=str_split($str);
-    for ($i = 0; $i < count($str); $i++){
-      $char = (string) $str[$i];
-      if (mb_strpos("ACDEFGHIKLMNPQRSTVWY*","B") == false) {
-          return True;
+// Read FASTA file through HTML file upload or directly and encode
+function fas_read($file) {
+  $query = '';
+  $handle = fopen($file, "r");
+  if ($handle) {
+    while (($line = fgets($handle)) !== false) {
+      if($line[0]!=">" and !strstr($line, ' ')){
+        $query .= $line;
       }
     }
-    return True;
+    fclose($handle);
+  }
+  return $query;
 }
 
-function headerDBW($title) {
-    return "<html lang=\"en\">
-<head>
-<meta charset=\"utf-8\">
-    <meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge\">
-    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">
-<title>$title</title>
-       <!-- Bootstrap styles -->
-    <link rel=\"stylesheet\" href=\"https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css\" integrity=\"sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u\" crossorigin=\"anonymous\">
-  
-    <!-- IE 8 Support-->
-    <!--[if lt IE 9]>
-      <script src=\"https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js\"></script>
-      <script src=\"https://oss.maxcdn.com/respond/1.4.2/respond.min.js\"></script>
-    <![endif]--> 
-        <link rel=\"stylesheet\" href=\"DataTable/jquery.dataTables.min.css\"/>
-        <script type=\"text/javascript\" src=\"DataTable/jquery-2.2.0.min.js\"></script>
-        <script type=\"text/javascript\" src=\"DataTable/jquery.dataTables.min.js\"></script>
 
-</head>
-<body bgcolor=\"#ffffff\">
-<div class= \"container\">
-<h1>$title</h1>
-";}
+// #priority to uploaded files
+if ($_FILES['uploaded_file']['name']) {
+    $_POST['fasta']=  fas_read($_FILES['uploaded_file']['tmp_name']);
+}
+
+// Read FASTA sequence from the HTML textbox and encode
+$encoded_query = urlencode($_POST["fasta"]);
+
+// Build the request
+$data = array('CMD' => 'Put', 'PROGRAM' => 'blastp', 'DATABASE' => $database_to_use, 'EXPECT' => 0.00000001, 'FORMAT_TYPE' => 'Text', 'QUERY' => $encoded_query);
+$options = array(
+  'http' => array(
+    'header'  => "Content-type: application/x-www-form-urlencoded\r\n",
+    'method'  => 'POST',
+    'content' => http_build_query($data)
+  )
+);
+$context  = stream_context_create($options);
+
+// Get the response from BLAST
+$result = file_get_contents("https://blast.ncbi.nlm.nih.gov/blast/Blast.cgi", false, $context);
+
+// Parse out the request ID
+preg_match("/^.*RID = .*\$/m", $result, $ridm);
+$rid = implode("\n", $ridm);
+$rid = preg_replace('/\s+/', '', $rid);
+$rid = str_replace("RID=", "", $rid);
+
+// Parse out the estimated time to completion
+preg_match("/^.*RTOE = .*\$/m", $result, $rtoem);
+$rtoe = implode("\n", $rtoem);
+$rtoe = preg_replace('/\s+/', '', $rtoe);
+$rtoe = str_replace("RTOE=", "", $rtoe);
+
+// Maximum execution time of webserver (optional)
+ini_set('max_execution_time', $rtoe+6000);
+
+//converting string to long (sleep() expects a long)
+$rtoe = $rtoe + 0;
+
+// Wait for search to complete
+sleep($rtoe);
+
+// Poll for results
+while(true) {
+  sleep(10);
+
+  $opts = array(
+  	'http' => array(
+      'method' => 'GET'
+  	)
+  );
+  $contxt = stream_context_create($opts);
+  $reslt = file_get_contents("https://blast.ncbi.nlm.nih.gov/blast/Blast.cgi?CMD=Get&FORMAT_OBJECT=SearchInfo&RID=$rid", false, $contxt);
+
+  if(preg_match('/Status=WAITING/', $reslt)) {
+  	//print "Searching...\n";
+    continue;
+  }
+
+  if(preg_match('/Status=FAILED/', $reslt)) {
+    print "Search $rid failed, please report to blast-help\@ncbi.nlm.nih.gov.\n";
+    exit(4);
+  }
+
+  if(preg_match('/Status=UNKNOWN/', $reslt)) {
+    print "Search $rid expired.\n";
+    exit(3);
+  }
+
+  if(preg_match('/Status=READY/', $reslt)) {
+    if(preg_match('/ThereAreHits=yes/', $reslt)) {
+      //print "Search complete, retrieving results...\n";
+      break;
+  	} else {
+      print "No hits found.\n";
+      exit(2);
+  	}
+  }
+
+  // If we get here, something unexpected happened.
+  exit(5);
+} // End poll loop
+
+// Retrieve and display results
+$opt = array(
+  'http' => array(
+  	'method' => 'GET'
+  )
+);
+$content = stream_context_create($opt);
+$output = file_get_contents("https://blast.ncbi.nlm.nih.gov/blast/Blast.cgi?CMD=Get&FORMAT_TYPE=Text&RID=$rid", false, $content);
+
+
+$handle = explode("\n",$output);
+$switcher = False;
+if ($handle) {
+  foreach ($handle as $line) {
+    if (strstr($line, 'ALIGNMENTS')){
+      $switcher = False;
+      echo "</tbody> </table>";
+    }
+
+    if ($switcher == True){
+      // aqui la magia del formato
+      if(strlen($line) > 4){
+        $line_values = explode(" ", $line);
+        $line_values = array_values(array_filter($line_values));
+        $nr_ele = count($line_values);
+
+        $seq_id = $line_values[0];
+        $Bit_score = $line_values[$nr_ele - 3];
+        $E_value = $line_values[$nr_ele - 2];
+        $al_identity = $line_values[$nr_ele - 1];
+        $desc = implode(" ",array_splice($line_values , 1, $nr_ele  -4));
+
+        if ($database_to_use=="pdb"){
+          $idurl = explode("_",$seq_id)[0];
+          $url = "http://www.rcsb.org/structure/$idurl";
+        }
+        if ($database_to_use=="swissprot"){
+          $idurl = explode(".",$seq_id)[0];
+          $url = "https://www.uniprot.org/uniprot/$idurl";
+        }
+        ?>
+        <tr>
+          <td><?php print "<a href=\"$url\" target=\"_blank\">$seq_id</a>"  ?></td>
+          <td><?php print $desc ?></td>
+          <td><?php print $Bit_score  ?></td>
+          <td><?php print $E_value  ?></td>
+          <td><?php print $al_identity ?></td>
+        </tr>
+        <?php
+      }
+    }
+
+    if (strstr($line, 'Sequences producing significant alignments')){
+      ?>
+      <!-- <center><a href="index.html?new=1" class="button special" >New Search</a></center> -->
+      <center><a href="index.html?new=1" class="button" >New Search</a></center>
+      <table border="2" cellspacing="2" cellpadding="3" id="blastTable">
+      <thead>
+          <tr>
+	            <th>idCode</th>
+              <th>Header</th>
+              <th>Bit Score</th>
+              <th>E. value</th>
+              <th>Identity</th>
+          </tr>
+      </thead>
+      <tbody>
+      <?php
+      $switcher=True;
+    }
+  }
+?>
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('#blastTable').DataTable({
+          "order": [[ 2, "desc" ]]
+        });
+    });
+</script>
+<?php
+}
+
 
 ?>
+</section>
+<footer id="footer">
+  <div class="container">
+    <ul class="icons">
+      <li><a href="https://www.linkedin.com/in/iñigo-oyarzun-269090161" target="_blank" class="icon fa-linkedin"></a></li>
+      <li><a href="https://www.facebook.com/inigo.oyarzun.3" target="_blank"  class="icon fa-facebook"></a></li>
+
+    </ul>
+    <ul class="copyright">
+      <li> My Social Media </li>
+    </ul>
+  </div>
+</footer>
+  <script src="../assets/js/jquery.min.js"></script>
+  <script src="../assets/js/skel.min.js"></script>
+  <script src="../assets/js/util.js"></script>
+  <script src="../assets/js/main.js"></script>
+  </body>
+</html>
+
